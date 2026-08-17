@@ -1,72 +1,39 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include "build_tool.h"
+#include "input.h"
 
 int main()
 {
-    char input[MAX_INPUT];
+    char *line;
 
     printf("============================================\n");
-    printf("   Shell-Based Build Automation Tool\n");
+    printf("   %s\n", TOOL_NAME);
     printf("============================================\n");
-    printf("Type 'help' to see available commands.\n\n");
 
     while (1)
     {
         printf("build> ");
 
-        if (fgets(input, sizeof(input), stdin) == NULL)
+        line = read_line();
+
+        if (strcmp(line, "exit") == 0)
         {
+            free(line);
             break;
         }
 
-        input[strcspn(input, "\n")] = '\0';
-
-        if (strcmp(input, "exit") == 0)
+        if (strlen(line) != 0)
         {
-            printf("Exiting Build Automation Tool...\n");
-            break;
+            printf("You entered: %s\n", line);
         }
 
-        else if (strcmp(input, "help") == 0)
-        {
-            printf("\nAvailable commands:\n");
-            printf("  help   - Show available commands\n");
-            printf("  build  - Build the project\n");
-            printf("  clean  - Remove generated files\n");
-            printf("  status - Show project status\n");
-            printf("  exit   - Exit the tool\n\n");
-        }
-
-        else if (strcmp(input, "build") == 0)
-        {
-            printf("Build command received.\n");
-            printf("Build functionality will be implemented in future weeks.\n");
-        }
-
-        else if (strcmp(input, "clean") == 0)
-        {
-            printf("Clean command received.\n");
-            printf("Clean functionality will be implemented in future weeks.\n");
-        }
-
-        else if (strcmp(input, "status") == 0)
-        {
-            printf("Status command received.\n");
-            printf("Status functionality will be implemented in future weeks.\n");
-        }
-
-        else if (strlen(input) == 0)
-        {
-            continue;
-        }
-
-        else
-        {
-            printf("Unknown command: %s\n", input);
-            printf("Type 'help' for available commands.\n");
-        }
+        free(line);
     }
+
+    printf("Goodbye!\n");
 
     return 0;
 }
