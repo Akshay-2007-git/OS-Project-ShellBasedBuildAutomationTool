@@ -1,19 +1,28 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g -Iinclude
+CFLAGS = -Wall -Wextra -Iinclude
 
-SRC = src/main.c src/input.c
-TARGET = bin/buildtool
+TARGET = bin/shellforge
+
+SRC = src/main.c \
+      src/input.c \
+      src/parser.c \
+      src/process.c \
+      src/builtin.c
+
+OBJ = $(SRC:.c=.o)
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+$(TARGET): $(OBJ)
 	mkdir -p bin
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	$(CC) $(OBJ) -o $(TARGET)
+
+src/%.o: src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f src/*.o
+	rm -f $(TARGET)
 
 run: $(TARGET)
 	./$(TARGET)
-
-clean:
-	rm -rf bin/*
-
-.PHONY: all run clean
