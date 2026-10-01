@@ -16,7 +16,7 @@ char **parse_line(char *line)
 
     if (tokens == NULL)
     {
-        perror("ShellForge");
+        perror("ShellForge: malloc");
         exit(EXIT_FAILURE);
     }
 
@@ -31,13 +31,16 @@ char **parse_line(char *line)
         {
             size *= 2;
 
-            tokens = realloc(tokens, size * sizeof(char *));
+            char **temp = realloc(tokens, size * sizeof(char *));
 
-            if (tokens == NULL)
+            if (temp == NULL)
             {
-                perror("ShellForge");
+                free(tokens);
+                perror("ShellForge: realloc");
                 exit(EXIT_FAILURE);
             }
+
+            tokens = temp;
         }
 
         token = strtok(NULL, TOKEN_DELIMITERS);

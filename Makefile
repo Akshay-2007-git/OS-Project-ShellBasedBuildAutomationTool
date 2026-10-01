@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Iinclude
+CFLAGS = -Wall -Wextra -g -Iinclude
 
 TARGET = bin/shellforge
 
@@ -21,6 +21,10 @@ $(TARGET): $(OBJ)
 
 src/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+asan:
+	mkdir -p bin
+	$(CC) $(CFLAGS) -fsanitize=address $(SRC) -o $(TARGET)
 
 clean:
 	rm -f src/*.o

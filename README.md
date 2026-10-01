@@ -489,3 +489,102 @@ Only one pipe is supported in this Week 7 implementation.
 ### Week 7 Outcome
 
 The Shell-Based Build Automation Tool can now connect the output of one command directly to the input of another command using Unix pipes and file-descriptor redirection.
+---
+
+## Week 8: Memory Management, Debugging and Valgrind
+
+Week 8 focuses on improving the reliability of the Shell-Based Build Automation Tool through defensive programming, memory management, debugging, and memory-error detection.
+
+No new source module was introduced during this week. The existing implementation was reviewed and improved for safer memory handling.
+
+### Memory Management
+
+The project uses dynamic memory for command input and parsed command tokens.
+
+Memory management was reviewed to ensure that:
+
+* Every `malloc()` allocation is released with `free()`
+* `realloc()` results are checked before replacing the original pointer
+* Memory is released when allocation fails
+* Command token arrays are freed after execution
+* Dynamically allocated pipe token arrays are released
+* No memory is intentionally left allocated
+
+### Defensive Programming
+
+The project checks the return values of important operations including:
+
+* `malloc()`
+* `realloc()`
+* `fork()`
+* `execvp()`
+* `pipe()`
+* `dup2()`
+* `waitpid()`
+
+File descriptors used by pipes are also closed after they are no longer required.
+
+Child processes are reaped using `waitpid()`.
+
+### Valgrind
+
+Valgrind is used to detect memory leaks and memory-related errors.
+
+Command used:
+
+    valgrind --leak-check=full --show-leak-kinds=all ./bin/shellforge
+
+A healthy execution should report:
+
+    All heap blocks were freed -- no leaks are possible
+
+and:
+
+    ERROR SUMMARY: 0 errors
+
+### GDB
+
+The project is compiled with debugging symbols using the `-g` compiler option.
+
+GDB can be started using:
+
+    gdb ./bin/shellforge
+
+Useful debugging commands include:
+
+    break main
+    run
+    next
+    step
+    print line
+    backtrace
+    continue
+    quit
+
+### AddressSanitizer
+
+AddressSanitizer support was added to the Makefile.
+
+Build with:
+
+    make asan
+
+Run with:
+
+    ./bin/shellforge
+
+AddressSanitizer can detect memory errors such as heap-buffer-overflow during execution.
+
+### Debugging Makefile
+
+The Makefile now includes debugging symbols:
+
+    CFLAGS = -Wall -Wextra -g -Iinclude
+
+It also provides an AddressSanitizer build target:
+
+    make asan
+
+### Week 8 Outcome
+
+The Shell-Based Build Automation Tool has been reviewed for memory safety and defensive programming. Valgrind, GDB, and AddressSanitizer can now be used to detect memory leaks, debug execution, and identify memory-related errors.
