@@ -7,11 +7,20 @@
 #include "parser.h"
 #include "builtin.h"
 #include "process.h"
+#include "signals.h"
 
-int main()
+int main(void)
 {
     char *line;
     char **tokens;
+
+    /*
+     * WEEK 6
+     *
+     * Initialize signal handling before starting
+     * the command loop.
+     */
+    initialize_signals();
 
     printf("============================================\n");
     printf("   %s\n", TOOL_NAME);
@@ -22,6 +31,7 @@ int main()
     while (1)
     {
         printf("build> ");
+        fflush(stdout);
 
         line = read_line();
 
@@ -73,16 +83,19 @@ int main()
         /*
          * Not a built-in.
          *
-         * WEEK 4
+         * WEEK 4 + WEEK 6
          *
          * Execute the command using fork(),
-         * execvp(), and waitpid().
+         * execvp(), waitpid(), and signal handling.
          */
         if (builtin_result == 0)
         {
             execute_process(tokens);
         }
 
+        /*
+         * Free memory allocated for the current command.
+         */
         free_tokens(tokens);
         free(line);
     }

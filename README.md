@@ -308,3 +308,86 @@ Week 3 → Command Parsing and Tokenization
 Week 4 → Process Creation and Process Control
 Week 5 → Built-in Commands and Environment Variables
 ```
+---
+
+## Week 6: Signals and Process Control
+
+Week 6 focuses on handling Unix signals and controlling child processes in the Shell-Based Build Automation Tool.
+
+The project was extended to handle signals safely so that the build tool continues running when an external command is interrupted.
+
+### Concepts Implemented
+
+* `sigaction()` for signal handling
+* `SIGINT` handling for Ctrl+C
+* `SIGCHLD` signal handling
+* Restoring default `SIGINT` behavior in child processes
+* `waitpid()` for child process control
+* Handling interrupted `waitpid()` calls
+* Process termination status checking
+* Preventing the main build tool from terminating when Ctrl+C is pressed
+
+### Signal Handling Behavior
+
+When the user executes an external command, the project creates a child process using `fork()`.
+
+The child process restores the default `SIGINT` behavior so that Ctrl+C can terminate the running command.
+
+The parent build tool installs its own `SIGINT` handler so that the build tool itself continues running.
+
+The process flow is:
+
+    User Command
+         |
+         v
+       Parser
+         |
+         v
+       fork()
+      /      \
+     /        \
+  Parent     Child
+    |          |
+ waitpid()   SIGINT = default
+    |          |
+    |        execvp()
+    |          |
+    +----------+
+         |
+         v
+   Exit Status
+
+### Implementation Files
+
+    include/signals.h
+    src/signals.c
+    src/main.c
+    src/process.c
+    Makefile
+
+### Example
+
+Run the build tool:
+
+    make run
+
+Then execute a long-running command:
+
+    build> build sleep 20
+
+Press:
+
+    Ctrl + C
+
+The `sleep` process is terminated while the build tool continues running and displays the prompt again.
+
+### Signals Used
+
+| Signal | Purpose |
+| --- | --- |
+| `SIGINT` | Handles Ctrl+C |
+| `SIGCHLD` | Indicates that a child process has changed state |
+
+### Week 6 Outcome
+
+The Shell-Based Build Automation Tool can now handle signals and child-process termination more safely while maintaining the interactive command prompt.
