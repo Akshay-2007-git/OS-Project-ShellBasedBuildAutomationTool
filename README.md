@@ -391,3 +391,101 @@ The `sleep` process is terminated while the build tool continues running and dis
 ### Week 6 Outcome
 
 The Shell-Based Build Automation Tool can now handle signals and child-process termination more safely while maintaining the interactive command prompt.
+---
+
+## Week 7: Pipes and Inter-Process Communication
+
+Week 7 extends the Shell-Based Build Automation Tool with anonymous pipe support for communication between two processes.
+
+The project now supports two-command pipelines using the Unix `pipe()` and `dup2()` system calls.
+
+### Concepts Implemented
+
+* Anonymous pipes
+* Inter-Process Communication (IPC)
+* `pipe()` system call
+* `dup2()` for input/output redirection
+* Two-stage pipelines
+* Multiple child processes
+* File descriptor management
+* `waitpid()` for child process synchronization
+
+### Pipeline Flow
+
+    User Input
+         |
+         v
+    Command Parser
+         |
+         v
+    Left Command | Right Command
+         |
+         v
+       pipe()
+        /  \
+       /    \
+      v      v
+    Child 1  Child 2
+      |        |
+    stdout   stdin
+      |        |
+      +--> Pipe <---+
+           |
+           v
+        Output
+
+### Example
+
+The following command sends the output of `ls` to `grep`:
+
+    build> ls | grep .c
+
+The first child executes:
+
+    ls
+
+Its standard output is redirected to the pipe.
+
+The second child executes:
+
+    grep .c
+
+Its standard input is redirected from the pipe.
+
+### System Calls Used
+
+| System Call | Purpose |
+| --- | --- |
+| `pipe()` | Creates an anonymous communication channel |
+| `fork()` | Creates child processes |
+| `dup2()` | Redirects standard input/output |
+| `execvp()` | Executes commands |
+| `close()` | Closes unused file descriptors |
+| `waitpid()` | Waits for child processes |
+
+### Supported Pipeline
+
+The Week 7 implementation supports a two-command pipeline:
+
+    command1 | command2
+
+Examples:
+
+    build> ls | grep .c
+
+    build> ls | wc
+
+    build> ps | grep bash
+
+Only one pipe is supported in this Week 7 implementation.
+
+### Implementation Files
+
+    include/pipes.h
+    src/pipes.c
+    src/main.c
+    Makefile
+
+### Week 7 Outcome
+
+The Shell-Based Build Automation Tool can now connect the output of one command directly to the input of another command using Unix pipes and file-descriptor redirection.
