@@ -588,3 +588,33 @@ It also provides an AddressSanitizer build target:
 ### Week 8 Outcome
 
 The Shell-Based Build Automation Tool has been reviewed for memory safety and defensive programming. Valgrind, GDB, and AddressSanitizer can now be used to detect memory leaks, debug execution, and identify memory-related errors.
+## Week 9 – File Descriptors and I/O Redirection
+
+### Objective
+
+Implemented file descriptor management and input/output/error redirection in the Shell-Based Build Automation Tool.
+
+### Concepts Implemented
+
+- File descriptors
+- `open()`
+- `close()`
+- `dup2()`
+- Standard input (`stdin`)
+- Standard output (`stdout`)
+- Standard error (`stderr`)
+- Output redirection using `>`
+- Append redirection using `>>`
+- Input redirection using `<`
+- Error redirection using `2>`
+- File creation and file permissions
+- Integration with existing process execution
+- Integration with existing pipe functionality
+
+### Redirection Features
+
+#### Output Redirection
+
+```text
+build> echo Hello > output.txt
+```

@@ -9,6 +9,7 @@
 #include "process.h"
 #include "signals.h"
 #include "pipes.h"
+#include "redirect.h"
 
 #define PIPE_TOKEN_SIZE 64
 
@@ -91,7 +92,7 @@ int main(void)
             right_command = strtok(NULL, "|");
 
             /*
-             * Only one pipe is supported in Week 7.
+             * Only one pipe is supported.
              */
             if (left_command == NULL ||
                 right_command == NULL ||
@@ -142,6 +143,9 @@ int main(void)
             continue;
         }
 
+        /*
+         * Built-in commands are handled first.
+         */
         int builtin_result = execute_builtin(tokens);
 
         if (builtin_result == -1)
@@ -151,9 +155,20 @@ int main(void)
             break;
         }
 
+        /*
+         * If it is not a built-in command,
+         * check for I/O redirection.
+         */
         if (builtin_result == 0)
         {
-            execute_process(tokens);
+            if (execute_redirection(tokens) == 0)
+            {
+                /*
+                 * No redirection was found,
+                 * so execute normally.
+                 */
+                execute_process(tokens);
+            }
         }
 
         free_tokens(tokens);
