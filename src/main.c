@@ -2,50 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "build_tool.h"
-#include "input.h"
-#include "parser.h"
-#include "builtin.h"
-#include "process.h"
-#include "signals.h"
-#include "pipes.h"
-#include "redirect.h"
+#include "../include/input.h"
+#include "../include/parser.h"
+#include "../include/process.h"
+#include "../include/builtin.h"
+#include "../include/signals.h"
+#include "../include/pipes.h"
+#include "../include/redirect.h"
+#include "../include/thread.h"
 
-#define PIPE_TOKEN_SIZE 64
-
-static void tokenize_pipe_command(char *command, char **tokens)
+static void tokenize(char *str, char **argv)
 {
-    int position = 0;
+    int i = 0;
 
-    char *token = strtok(command, " \t\r\n\a");
+    char *token = strtok(str, " \t\n");
 
-    while (token != NULL && position < PIPE_TOKEN_SIZE - 1)
+    while (token != NULL)
     {
-        tokens[position] = token;
-        position++;
-
-        token = strtok(NULL, " \t\r\n\a");
+        argv[i++] = token;
+        token = strtok(NULL, " \t\n");
     }
 
-    tokens[position] = NULL;
+    argv[i] = NULL;
 }
 
-int main(void)
+int main()
 {
     char *line;
     char **tokens;
 
     initialize_signals();
 
-    printf("============================================\n");
-    printf("   %s\n", TOOL_NAME);
-    printf("============================================\n");
-
-    printf("Type 'help' to see available commands.\n\n");
-
     while (1)
     {
-        printf("build> ");
+        printf("myshell> ");
         fflush(stdout);
 
         line = read_line();
@@ -55,127 +45,73 @@ int main(void)
             break;
         }
 
-        if (strlen(line) == 0)
+        if (strcmp(line, "exit") == 0)
         {
-            free(line);
-            continue;
-        }
-
-        /*
-         * Check whether the user entered a pipe.
-         */
-        if (strchr(line, '|') != NULL)
-        {
-            char *left_command;
-            char *right_command;
-            char **pipe_tokens1;
-            char **pipe_tokens2;
-
-            pipe_tokens1 = malloc(PIPE_TOKEN_SIZE * sizeof(char *));
-            pipe_tokens2 = malloc(PIPE_TOKEN_SIZE * sizeof(char *));
-
-            if (pipe_tokens1 == NULL || pipe_tokens2 == NULL)
-            {
-                fprintf(stderr, "Memory Allocation Failed\n");
-
-                free(pipe_tokens1);
-                free(pipe_tokens2);
-                free(line);
-
-                continue;
-            }
-
-            /*
-             * Split the input around the pipe.
-             */
-            left_command = strtok(line, "|");
-            right_command = strtok(NULL, "|");
-
-            /*
-             * Only one pipe is supported.
-             */
-            if (left_command == NULL ||
-                right_command == NULL ||
-                strchr(right_command, '|') != NULL)
-            {
-                printf("Invalid pipe command\n");
-
-                free(pipe_tokens1);
-                free(pipe_tokens2);
-                free(line);
-
-                continue;
-            }
-
-            tokenize_pipe_command(left_command, pipe_tokens1);
-            tokenize_pipe_command(right_command, pipe_tokens2);
-
-            if (pipe_tokens1[0] == NULL ||
-                pipe_tokens2[0] == NULL)
-            {
-                printf("Invalid pipe command\n");
-
-                free(pipe_tokens1);
-                free(pipe_tokens2);
-                free(line);
-
-                continue;
-            }
-
-            execute_pipe(pipe_tokens1, pipe_tokens2);
-
-            free(pipe_tokens1);
-            free(pipe_tokens2);
-            free(line);
-
-            continue;
-        }
-
-        /*
-         * Normal non-pipe command.
-         */
-        tokens = parse_line(line);
-
-        if (tokens == NULL || tokens[0] == NULL)
-        {
-            free_tokens(tokens);
-            free(line);
-            continue;
-        }
-
-        /*
-         * Built-in commands are handled first.
-         */
-        int builtin_result = execute_builtin(tokens);
-
-        if (builtin_result == -1)
-        {
-            free_tokens(tokens);
             free(line);
             break;
         }
 
         /*
-         * If it is not a built-in command,
-         * check for I/O redirection.
+         * Week 10:
+         * Run the build automation task
+         * using a separate thread and monitor
+         * its execution using another thread.
          */
-        if (builtin_result == 0)
+        if (strcmp(line, "build") == 0)
         {
-            if (execute_redirection(tokens) == 0)
-            {
-                /*
-                 * No redirection was found,
-                 * so execute normally.
-                 */
-                execute_process(tokens);
-            }
+            start_build_monitor();
+            start_build_task();
+
+            wait_for_build_task();
+            stop_build_monitor();
+
+            free(line);
+            continue;
         }
 
-        free_tokens(tokens);
+        /*
+         * Pipe handling
+         */
+        if (strchr(line, '|') != NULL)
+        {
+            char *argv1[64];
+            char *argv2[64];
+
+            char *left = strtok(line, "|");
+            char *right = strtok(NULL, "|");
+
+            if (left == NULL || right == NULL)
+            {
+                printf("Invalid pipe command\n");
+                free(line);
+                continue;
+            }
+
+            tokenize(left, argv1);
+            tokenize(right, argv2);
+
+            execute_pipe(argv1, argv2);
+        }
+        else
+        {
+            /*
+             * Normal command processing
+             */
+            tokens = parse_line(line);
+
+            if (execute_builtin(tokens) == 0)
+            {
+                if (execute_redirection(tokens) == 0)
+                {
+                    execute_process(tokens);
+                }
+            }
+
+            free_tokens(tokens);
+        }
+
         free(line);
     }
-
-    printf("\nGoodbye!\n");
 
     return 0;
 }

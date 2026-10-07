@@ -618,3 +618,15 @@ Implemented file descriptor management and input/output/error redirection in the
 ```text
 build> echo Hello > output.txt
 ```
+## Week 10 Features
+
+- POSIX thread support
+- Build task executed using a separate thread
+- Background build monitoring thread
+- pthread_create()
+- pthread_join()
+- Mutex synchronization
+- Shared build status protection
+- Critical section protection
+- Race condition prevention
+- Concurrent build monitoring
