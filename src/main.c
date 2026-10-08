@@ -30,7 +30,11 @@ int main()
 {
     char *line;
     char **tokens;
-
+    printf("\n");
+    printf("========================================\n");
+    printf("   Shell-Based Build Automation Tool\n");
+    printf("========================================\n");
+    printf("\n");
     initialize_signals();
 
     while (1)
