@@ -28,3 +28,6 @@ run:
 
 clean:
 	rm -rf bin/*
+deadlock-demo:
+	mkdir -p bin
+	gcc -Wall -Wextra -g src/deadlock.c -pthread -o bin/deadlock

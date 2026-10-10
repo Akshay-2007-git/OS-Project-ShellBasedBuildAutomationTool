@@ -1,0 +1,3 @@
+Run the project's existing thread/concurrency feature.
+Confirm that the worker threads finish and the program exits.
+Run the standalone deadlock demonstration separately using timeout.

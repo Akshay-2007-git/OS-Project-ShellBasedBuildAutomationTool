@@ -630,3 +630,54 @@ build> echo Hello > output.txt
 - Critical section protection
 - Race condition prevention
 - Concurrent build monitoring
+## Week 11 — Deadlocks and Job Control
+
+This phase covers deadlock demonstration using POSIX threads and mutexes, along with job-management concepts such as running, stopped, and completed processes.
+
+### Deadlock demonstration
+
+Compile the standalone demonstration:
+
+```bash
+gcc -Wall -Wextra -g src/deadlock.c -pthread -o bin/deadlock
+```
+
+Run it safely:
+
+```bash
+timeout 5s ./bin/deadlock
+```
+
+The demonstration illustrates why consistent lock ordering is important for deadlock prevention.
+
+### Job control
+
+The job-control design uses process groups, terminal foreground ownership, signals, and child-process status tracking. The `jobs`, `fg`, `bg`, and `&` commands should be tested after integration with the existing parser and process executor.
+
+## Week 12 — Testing and Documentation
+
+Week 12 focuses on regression testing, architecture documentation, test-case documentation, and project cleanup.
+
+Documentation:
+- `docs/design.md`
+- `docs/testing.md`
+
+Test plans:
+- `tests/basic_commands.txt`
+- `tests/redirection.txt`
+- `tests/pipes.txt`
+- `tests/jobs.txt`
+- `tests/concurrency.txt`
+
+## Build and Test
+
+```bash
+make clean
+make
+```
+
+Run the project using the existing run target or executable documented in this repository.
+
+## Final Verification
+
+Verify the build, existing commands, pipes, redirection, signal handling, and concurrency features. Test job control only after the commands are fully integrated. Do not report a feature as completed until it has been tested successfully.
