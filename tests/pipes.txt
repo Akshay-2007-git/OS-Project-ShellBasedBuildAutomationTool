@@ -1,0 +1,2 @@
+printf "banana\napple\ncherry\n" | sort
+printf "one\ntwo\nthree\n" | wc -l

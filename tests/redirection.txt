@@ -1,0 +1,4 @@
+echo Hello > output.txt
+cat < output.txt
+echo Second line >> output.txt
+cat output.txt
